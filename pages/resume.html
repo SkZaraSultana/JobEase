@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Resume Builder</title>
+
+<!-- ✅ Add jsPDF -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<!-- ✅ You can keep html2canvas if needed later -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background: #fdf6e3;
+    margin: 0;
+    padding: 0;
+    color: #333;
+  }
+  header {
+    background: #6b4226;
+    color: #fff;
+    text-align: center;
+    padding: 20px;
+  }
+  main {
+    padding: 20px 40px;
+  }
+  h2 {
+    color: #6b4226;
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  form {
+    background: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    border: 2px solid #6b4226;
+    margin-bottom: 30px;
+  }
+  label {
+    display: block;
+    margin-top: 10px;
+    font-weight: bold;
+  }
+  input, textarea {
+    width: 100%;
+    padding: 8px;
+    margin-top: 5px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+  }
+  button {
+    background: #6b4226;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    margin-top: 15px;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  button:hover {
+    background: #4b2e1e;
+  }
+  .resume {
+    background: #fff;
+    border: 2px solid #6b4226;
+    border-radius: 10px;
+    padding: 20px;
+    margin-top: 20px;
+  }
+  .resume h3 {
+    color: #4b2e1e;
+    margin-bottom: 10px;
+    margin-top: 20px;
+  }
+  .resume h4 {
+    margin: 5px 0;
+    color: #333;
+  }
+  .resume p {
+    margin: 2px 0;
+  }
+  .resume {
+  max-width: 800px;   /* Keep within A4 width */
+  margin: auto;       /* Center it */
+}
+  .home-btn {
+    display: inline-block;
+    margin-top: 20px;
+    padding: 10px 20px;
+    background: #6b4226;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 5px;
+  }
+  .home-btn:hover {
+    background: #4b2e1e;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Resume Builder</h1>
+</header>
+
+<main>
+<h2>Fill Your Details</h2>
+
+<form id="resumeForm">
+
+  <label>Name:</label>
+  <input type="text" id="name" required>
+
+  <label>Mobile:</label>
+  <input type="text" id="mobile" required>
+
+  <label>Email:</label>
+  <input type="email" id="email" required>
+
+  <label>LinkedIn / GitHub (optional):</label>
+  <input type="text" id="links">
+
+  <label>Location:</label>
+  <input type="text" id="location" required>
+
+  <label>Career Objective:</label>
+  <textarea id="objective" rows="3">To begin my career in a reputable organization where I can utilize my skills, gain practical experience, and contribute to the company’s growth while enhancing my professional development.</textarea>
+
+  <h3>Education</h3>
+  <label>Degree / B.Tech:</label>
+  <input type="text" id="degree" required>
+  <label>College/University:</label>
+  <input type="text" id="college" required>
+  <label>Year of Passing:</label>
+  <input type="text" id="degreeYear" required>
+  <label>Percentage:</label>
+  <input type="text" id="degreePercent" required>
+
+  <label>Intermediate / Diploma:</label>
+  <input type="text" id="intermediate" required>
+  <label>Year:</label>
+  <input type="text" id="interYear" required>
+  <label>Percentage:</label>
+  <input type="text" id="interPercent" required>
+
+  <label>Secondary (10th):</label>
+  <input type="text" id="secondary" required>
+  <label>Year:</label>
+  <input type="text" id="secondaryYear" required>
+  <label>Percentage:</label>
+  <input type="text" id="secondaryPercent" required>
+
+  <label>Projects / Internships (one per line):</label>
+  <textarea id="projects" rows="3"></textarea>
+
+  <label>Technical Skills (comma separated):</label>
+  <input type="text" id="techSkills">
+
+  <label>Soft Skills (comma separated):</label>
+  <input type="text" id="softSkills">
+
+  <label>Languages Known (comma separated):</label>
+  <input type="text" id="languages">
+
+  <label>Certifications (one per line):</label>
+  <textarea id="certifications" rows="3"></textarea>
+
+  <label>Achievements / Activities (one per line):</label>
+  <textarea id="achievements" rows="3"></textarea>
+
+  <h3>Personal Details</h3>
+  <label>Father's Name:</label>
+  <input type="text" id="father">
+
+  <label>Date of Birth:</label>
+  <input type="date" id="dob">
+
+  <label>Nationality:</label>
+  <input type="text" id="nationality">
+
+  <label>Hobbies / Interests:</label>
+  <textarea id="hobbies" rows="2"></textarea>
+
+  <button type="submit">Generate Resume</button>
+</form>
+
+<div id="resumeOutput" class="resume" style="display:none;"></div>
+
+<!-- Download PDF button -->
+<button id="downloadBtn" style="display:none;">Download PDF</button>
+
+<a href="../index.html" class="home-btn" style="display:none;" id="homeBtn">Go to Home Page</a>
+
+<script>
+  const form = document.getElementById('resumeForm');
+  const resumeDiv = document.getElementById('resumeOutput');
+  const homeBtn = document.getElementById('homeBtn');
+  const downloadBtn = document.getElementById('downloadBtn');
+
+  form.addEventListener('submit', function(e){
+    e.preventDefault();
+
+    const data = {
+      name: document.getElementById('name').value,
+      mobile: document.getElementById('mobile').value,
+      email: document.getElementById('email').value,
+      links: document.getElementById('links').value || 'N/A',
+      location: document.getElementById('location').value,
+      objective: document.getElementById('objective').value,
+      degree: document.getElementById('degree').value,
+      college: document.getElementById('college').value,
+      degreeYear: document.getElementById('degreeYear').value,
+      degreePercent: document.getElementById('degreePercent').value,
+      intermediate: document.getElementById('intermediate').value,
+      interYear: document.getElementById('interYear').value,
+      interPercent: document.getElementById('interPercent').value,
+      secondary: document.getElementById('secondary').value,
+      secondaryYear: document.getElementById('secondaryYear').value,
+      secondaryPercent: document.getElementById('secondaryPercent').value,
+      projects: document.getElementById('projects').value.split('\n'),
+      techSkills: document.getElementById('techSkills').value.split(','),
+      softSkills: document.getElementById('softSkills').value.split(','),
+      languages: document.getElementById('languages').value.split(','),
+      certifications: document.getElementById('certifications').value.split('\n'),
+      achievements: document.getElementById('achievements').value.split('\n'),
+      father: document.getElementById('father').value,
+      dob: document.getElementById('dob').value,
+      nationality: document.getElementById('nationality').value,
+      hobbies: document.getElementById('hobbies').value.split(',')
+    };
+
+    let html = `
+<h3>RESUME</h3>
+<ul>
+<li><strong>Name:</strong> ${data.name}</li>
+<li><strong>Mobile:</strong> ${data.mobile}</li>
+<li><strong>Email:</strong> ${data.email}</li>
+<li><strong>LinkedIn/GitHub:</strong> ${data.links}</li>
+<li><strong>Location:</strong> ${data.location}</li>
+</ul>
+
+<h3>Career Objective</h3>
+<p>${data.objective}</p>
+
+<h3>Education</h3>
+
+<div style="margin-bottom:15px;">
+  <h4>Degree / B.Tech</h4>
+  <p>College/University: ${data.college}</p>
+  <p>Year: ${data.degreeYear}</p>
+  <p>Percentage: ${data.degreePercent}</p>
+</div>
+
+<div style="margin-bottom:15px;">
+  <h4>Intermediate / Diploma</h4>
+  <p>College: ${data.intermediate}</p>
+  <p>Year: ${data.interYear}</p>
+  <p>Percentage: ${data.interPercent}</p>
+</div>
+
+<div style="margin-bottom:15px;">
+  <h4>Secondary (10th)</h4>
+  <p>School: ${data.secondary}</p>
+  <p>Year: ${data.secondaryYear}</p>
+  <p>Percentage: ${data.secondaryPercent}</p>
+</div>
+
+<h3>Projects / Internships</h3>
+<ul>
+${data.projects.map(p=>`<li>${p}</li>`).join('')}
+</ul>
+
+<h3>Skills</h3>
+<ul>
+<li><strong>Technical Skills:</strong> ${data.techSkills.join(', ')}</li>
+<li><strong>Soft Skills:</strong> ${data.softSkills.join(', ')}</li>
+<li><strong>Languages:</strong> ${data.languages.join(', ')}</li>
+</ul>
+
+<h3>Certifications</h3>
+<ul>
+${data.certifications.map(c=>`<li>${c}</li>`).join('')}
+</ul>
+
+<h3>Achievements / Activities</h3>
+<ul>
+${data.achievements.map(a=>`<li>${a}</li>`).join('')}
+</ul>
+
+<h3>Personal Details</h3>
+<ul>
+<li>Father’s Name: ${data.father}</li>
+<li>Date of Birth: ${data.dob}</li>
+<li>Nationality: ${data.nationality}</li>
+<li>Hobbies/Interests: ${data.hobbies.join(', ')}</li>
+</ul>
+`;
+
+    resumeDiv.style.display = 'block';
+    resumeDiv.innerHTML = html;
+    homeBtn.style.display = 'inline-block';
+    downloadBtn.style.display = 'inline-block'; 
+  });
+
+  // PDF Download Function
+downloadBtn.addEventListener('click', function () {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF("p", "mm", "a4");
+
+  html2canvas(resumeDiv, {
+    scale: 2,   // sharp quality
+    useCORS: true
+  }).then(canvas => {
+    const imgData = canvas.toDataURL("image/png");
+
+    const pdfWidth = doc.internal.pageSize.getWidth();
+    const pdfHeight = doc.internal.pageSize.getHeight();
+
+    // calculate proportional height
+    const imgWidth = pdfWidth;
+    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+    let heightLeft = imgHeight;
+    let position = 0;
+
+    // first page
+    doc.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+    heightLeft -= pdfHeight;
+
+    // add more pages if needed
+    while (heightLeft > 0) {
+      position -= pdfHeight;
+      doc.addPage();
+      doc.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+      heightLeft -= pdfHeight;
+    }
+
+    doc.save("resume.pdf");
+  });
+});
+
+</script>
+
+</main>
+</body>
+</html>

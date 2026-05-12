@@ -3,6 +3,8 @@
 **JobEase** – Your ultimate career companion, built by **Zara Sultana**.  
 
 Link : https://jobeasego.netlify.app
+
+
 A modern web app to **build professional resumes, prepare for interviews, and explore job opportunities** — all in an easy, organized way. 💼✨
 
 ---
